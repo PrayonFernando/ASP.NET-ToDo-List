@@ -1,0 +1,133 @@
+﻿@model ToDoItem
+@{
+    ViewData["Title"] = "To-Do List";
+}
+
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    body {
+        background: linear-gradient(-45deg, #1a1a1a, #222, #f1c40f, #ffdd57);
+        background-size: 400% 400%;
+        animation: gradientAnimation 10s ease infinite;
+        color: #f1c40f;
+        font-family: Arial, sans-serif;
+    }
+
+    .drawer {
+        position: fixed;
+        top: 0;
+        right: -400px;
+        width: 350px;
+        height: 100vh;
+        background: #222;
+        box-shadow: -5px 0px 15px rgba(255, 223, 57, 0.2);
+        padding: 20px;
+        transition: right 0.3s ease-in-out;
+        color: #f1c40f;
+    }
+
+        .drawer.open {
+            right: 0;
+        }
+
+        .drawer input, .drawer textarea, .drawer select {
+            background: #333;
+            color: #f1c40f;
+            border: 1px solid #f1c40f;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+            .drawer input:focus, .drawer textarea:focus, .drawer select:focus {
+                border-color: #ffdd57;
+                outline: none;
+            }
+
+    .btn-save {
+        background: #f1c40f;
+        color: #1a1a1a;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: bold;
+        width: 100%;
+    }
+
+        .btn-save:hover {
+            background: #ffdd57;
+        }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: #f1c40f;
+        font-size: 1.5rem;
+        cursor: pointer;
+        position: absolute;
+        top: 10px;
+        right: 15px;
+    }
+</style>
+
+<div id="editDrawer" class="drawer">
+    <button class="close-btn" onclick="toggleDrawer()">✖</button>
+    <h3>Edit Task</h3>
+    <form id="editForm" asp-action="Edit" method="post">
+        <input type="hidden" name="Id" id="editId" />
+
+        <label>Task Name</label>
+        <input type="text" name="Title" id="editTitle" required />
+
+        <label>Description</label>
+        <textarea name="Description" id="editDescription"></textarea>
+
+        <label>Priority</label>
+        <select name="Priority" id="editPriority">
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+        </select>
+
+        <label>Due Time</label>
+        <input type="datetime-local" name="DueTime" id="editDueTime" required />
+
+        <button type="submit" class="btn-save">Save Changes</button>
+    </form>
+</div>
+
+<script>
+    function toggleDrawer() {
+        document.getElementById('editDrawer').classList.toggle('open');
+    }
+
+    function openEditDrawer(id, title, description, priority, dueTime) {
+        document.getElementById('editId').value = id;
+        document.getElementById('editTitle').value = title;
+        document.getElementById('editDescription').value = description;
+        document.getElementById('editPriority').value = priority;
+        document.getElementById('editDueTime').value = dueTime;
+        toggleDrawer();
+    }
+</script>
+
+<!-- Modify Edit Buttons in Task List to Open Drawer -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".edit-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let task = JSON.parse(this.getAttribute("data-task"));
+                openEditDrawer(task.Id, task.Title, task.Description, task.Priority, task.DueTime);
+            });
+        });
+    });
+</script>

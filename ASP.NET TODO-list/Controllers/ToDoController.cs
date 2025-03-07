@@ -13,15 +13,16 @@
 
         public IActionResult Index()
         {
-            return View(_toDoList);
+            var sortedList = _toDoList.OrderBy(t => t.IsCompleted).ThenBy(t => t.DueTime).ToList();
+            return View(sortedList);
         }
 
         [HttpPost]
-        public IActionResult Create(string title, string priority, DateTime dueTime)
+        public IActionResult Create(string title, string description, string priority, DateTime dueTime)
         {
             if (!string.IsNullOrWhiteSpace(title))
             {
-                _toDoList.Add(new ToDoItem { Id = _nextId++, Title = title, IsCompleted = false, Priority = priority, DueTime = dueTime });
+                _toDoList.Add(new ToDoItem { Id = _nextId++, Title = title, Description = description, IsCompleted = false, Priority = priority, DueTime = dueTime });
             }
             return RedirectToAction("Index");
         }
@@ -43,6 +44,7 @@
             if (existingItem != null)
             {
                 existingItem.Title = updatedItem.Title;
+                existingItem.Description = updatedItem.Description;
                 existingItem.Priority = updatedItem.Priority;
                 existingItem.DueTime = updatedItem.DueTime;
             }
@@ -71,5 +73,6 @@
             return RedirectToAction("Index");
         }
     }
+
 
 }

@@ -1,0 +1,399 @@
+﻿@model List<ToDoItem>
+@{
+    ViewData["Title"] = "To-Do List";
+}
+
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-y: auto;
+        width: 100%;
+    }
+
+    body {
+        background: linear-gradient(-45deg, #1a1a1a, #222, #f1c40f, #ffdd57);
+        background-size: 400% 400%;
+        animation: gradientAnimation 10s ease infinite;
+        color: #f1c40f;
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 100vh;
+    }
+
+    .header-text {
+        text-align: center;
+        font-size: 3rem;
+        font-weight: bold;
+        color: #f1c40f;
+        margin-top: 20px;
+    }
+
+    .add-task {
+        cursor: pointer;
+        color: #f1c40f;
+        font-size: 1.5rem;
+        text-decoration: underline;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .popup-card {
+        position: fixed;
+        background: #222;
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(255, 223, 57, 0.3);
+        display: none;
+        width: 250px;
+        text-align: center;
+    }
+
+    .form-container {
+        background: #222;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 2px 6px 10px rgba(255, 223, 57, 0.2);
+    }
+
+    .description-textarea {
+        width: 100%;
+        height: 80px;
+        resize: none;
+    }
+
+    #particles-js {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        top: 0;
+        left: 0;
+        background-color: #1a1a1a;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 15%; /* Adjusted to leave gap at the top */
+        left: 50%;
+        transform: translate(-50%, 0);
+        background: #222;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(255, 223, 57, 0.3);
+        width: 350px;
+        color: #f1c40f;
+        z-index: 1000;
+        max-height: 75vh; /* Added to restrict height */
+        overflow-y: auto;
+    }
+
+        .modal input, .modal textarea, .modal select {
+            width: 100%;
+            background: #333;
+            color: #f1c40f;
+            border: 1px solid #f1c40f;
+            padding: 8px;
+            margin-bottom: 15px;
+            margin-top: 5px;
+            border-radius: 5px;
+        }
+
+    .btn-save {
+        background: #f1c40f;
+        color: #1a1a1a;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: bold;
+        width: 100%;
+    }
+
+        .btn-save:hover {
+            background: #ffdd57;
+        }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: #f1c40f;
+        font-size: 1.5rem;
+        cursor: pointer;
+        position: absolute;
+        top: 10px;
+        right: 15px;
+    }
+
+    .add-task-btn {
+        cursor: pointer;
+        color: #f1c40f;
+        font-size: 1.5rem;
+        text-decoration: underline;
+        margin-bottom: 10px;
+    }
+
+    .task-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        position: relative;
+    }
+
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 8px 15px rgba(241, 196, 15, 0.3);
+        }
+
+    .delete-icon {
+        position: absolute;
+        top: 50%;
+        right: 15px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: red;
+        font-size: 1.2rem;
+    }
+
+    .status-btn {
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .status-completed {
+        background-color: green;
+        color: white;
+    }
+
+    .status-pending {
+        background-color: orange;
+        color: white;
+    }
+
+    .welcome-text {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #f1c40f;
+        text-align: center;
+        margin-top: 20vh;
+        opacity: 1;
+        transition: opacity 2s ease-out;
+    }
+
+    .hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .task-form-container {
+        display: none;
+    }
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<div id="particles-js"></div>
+<div class="header-text">TO-DO LIST</div>
+
+<div class="container mt-4">
+    
+    <div class="add-task-btn" onclick="toggleTaskForm()">+ Add Task</div>
+    <div id="welcomeMessage" class="welcome-text">Welcome to Telexar TODO-List</div>
+    <div class="form-container task-form-container" id="taskForm">
+        <form asp-action="Create" method="post">
+            <div class="mb-3">
+                <label class="form-label">Task Name</label>
+                <input type="text" name="title" class="form-control" placeholder="Enter a new task" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-control description-textarea" placeholder="Enter a brief description"></textarea>
+            </div>
+            <div class="mb-3 d-flex gap-2">
+                <select name="priority" class="form-select" required>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+                <input type="datetime-local" name="dueTime" class="form-control" required />
+                <button type="submit" class="btn btn-warning">Add Task</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleTaskForm() {
+        const taskForm = document.getElementById('taskForm');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+
+        if (taskForm.style.display !== 'block') {
+            welcomeMessage.classList.add('hidden');
+            setTimeout(() => {
+                welcomeMessage.style.display = 'none';
+                taskForm.style.display = 'block';
+            }, 1000);
+        }
+    }
+</script>
+
+<div id="editTaskModal" class="modal">
+    <button class="close-btn" onclick="toggleEditModal()">✖</button>
+    <h3>Edit Task</h3>
+    <form id="editForm" asp-action="Edit" method="post">
+        <input type="hidden" name="Id" id="editId" />
+
+        <label>Task Name</label>
+        <input type="text" name="Title" id="editTitle" required />
+
+        <label>Description</label>
+        <textarea name="Description" id="editDescription"></textarea>
+
+        <label>Priority</label>
+        <select name="Priority" id="editPriority">
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+        </select>
+
+        <label>Due Time</label>
+        <input type="datetime-local" name="DueTime" id="editDueTime" required />
+
+        <button type="submit" class="btn-save">Save Changes</button>
+    </form>
+</div>
+
+<script>
+    function toggleEditModal() {
+        const modal = document.getElementById('editTaskModal');
+        modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function openEditModal(id, title, description, priority, dueTime) {
+        document.getElementById('editId').value = id;
+        document.getElementById('editTitle').value = title;
+        document.getElementById('editDescription').value = description;
+        document.getElementById('editPriority').value = priority;
+
+        // Convert dueTime to ISO format for datetime-local input
+        let formattedDueTime = new Date(dueTime).toISOString().slice(0, 16);
+        document.getElementById('editDueTime').value = formattedDueTime;
+
+        toggleEditModal();
+    }
+</script>
+
+@if (Model != null && Model.Count > 0)
+{
+    <table class="table table-bordered table-striped mt-4">
+        <thead class="table-dark">
+            <tr>
+                <th>Task</th>
+                <th>Description</th>
+                <th>Priority</th>
+                <th>Due Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="task-card" onclick="handleRowClick(event, @item.Id, '@item.Title', '@item.Description', '@item.Priority', '@item.DueTime.ToString("yyyy-MM-ddTHH:mm")')">
+                    <td class="@(item.IsCompleted ? "text-decoration-line-through" : "")">@item.Title</td>
+                    <td>@item.Description</td>
+                    <td>
+                        <span class="badge bg-@(item.Priority == "High" ? "danger" : item.Priority == "Medium" ? "warning" : "success")">
+                            @item.Priority
+                        </span>
+                    </td>
+                    <td>@item.DueTime.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>
+                        <form asp-action="ToggleComplete" method="post" style="display:inline;" onclick="event.stopPropagation();">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="status-btn @(item.IsCompleted ? "status-completed" : "status-pending")">
+                                @(item.IsCompleted ? "Completed" : "Pending")
+                            </button>
+                        </form>
+                    </td>
+                    <td>
+                        <form asp-action="Delete" method="post" style="display:inline;" onclick="event.stopPropagation();">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <span class="delete-icon" onclick="this.closest('form').submit()">🗑️</span>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<script>
+    function handleRowClick(event, id, title, description, priority, dueTime) {
+        if (!event.target.closest('button') && !event.target.closest('form')) {
+            openEditModal(id, title, description, priority, dueTime);
+        }
+    }
+</script>
+
+
+
+<script>
+    function confirmDelete() {
+        return confirm("Are you sure you want to delete this task?");
+    }
+
+    function checkDueTimes() {
+        const now = new Date();
+        document.querySelectorAll("tbody tr").forEach(row => {
+            const dueTimeText = row.children[3].innerText;
+            const dueTime = new Date(dueTimeText);
+            if (dueTime <= now && row.classList.contains("table-success") === false) {
+                alert("Task " + row.children[0].innerText + " is overdue!");
+            }
+        });
+    }
+    setInterval(checkDueTimes, 60000); 
+</script>
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+    particlesJS("particles-js", {
+        "particles": {
+            "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+            "color": { "value": "#f1c40f" },
+            "shape": { "type": "circle" },
+            "opacity": { "value": 0.5, "random": false },
+            "size": { "value": 3, "random": true },
+            "move": { "enable": true, "speed": 2, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false }
+        }
+    });
+</script>
+<div id="deletePopup" class="popup-card">
+    <p>Are you sure you want to delete this task?</p>
+    <form id="deleteForm" method="post" asp-action="Delete">
+        <input type="hidden" name="id" id="deleteTaskId" />
+        <button type="submit" class="btn btn-danger">Yes</button>
+        <button type="button" class="btn btn-secondary" onclick="hideDeletePopup()">No</button>
+    </form>
+</div>
+
+<script>
+    function showDeletePopup(taskId) {
+        document.getElementById('deleteTaskId').value = taskId;
+        document.getElementById('deletePopup').style.display = 'block';
+    }
+
+    function hideDeletePopup() {
+        document.getElementById('deletePopup').style.display = 'none';
+    }
+</script>
