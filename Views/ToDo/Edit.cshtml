@@ -1,0 +1,26 @@
+﻿@model ToDoItem
+
+<div class="container mt-4">
+    <h2>Edit Task</h2>
+    <form asp-action="Edit" method="post">
+        <input type="hidden" name="Id" value="@Model.Id" />
+        <div class="mb-3">
+            <label class="form-label">Task Name</label>
+            <input type="text" class="form-control" name="Title" value="@Model.Title" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Priority</label>
+            <select name="Priority" class="form-select" required>
+                <option value="High" selected="@(Model.Priority == "High")">High</option>
+                <option value="Medium" selected="@(Model.Priority == "Medium")">Medium</option>
+                <option value="Low" selected="@(Model.Priority == "Low")">Low</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Due Time</label>
+            <input type="datetime-local" class="form-control" name="DueTime" value="@Model.DueTime.ToString("yyyy-MM-ddTHH:mm")" required />
+        </div>
+        <button type="submit" class="btn btn-success">Update Task</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
