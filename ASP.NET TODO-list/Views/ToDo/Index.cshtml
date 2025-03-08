@@ -206,6 +206,25 @@
         display: none;
     }
 
+    #deletePopup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #222;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(255, 223, 57, 0.3);
+        width: 300px;
+        color: #f1c40f;
+        z-index: 1000;
+        text-align: center;
+    }
+
+        #deletePopup button {
+            margin: 5px;
+        }
 
 </style>
 <script src="https://kit.fontawesome.com/yourcode.js" crossorigin="anonymous"></script>
@@ -335,10 +354,11 @@
                         </form>
                     </td>
                     <td>
-                        <form asp-action="Delete" method="post" style="display:inline;" onclick="event.stopPropagation();">
-                            <input type="hidden" name="id" value="@item.Id" />
-                            <i class="fa-solid fa-trash delete-icon" onclick="this.closest('form').submit()"></i>
-                        </form>
+                        @* <form asp-action="Delete" method="post" style="display:inline;" onclick="event.stopPropagation();"> *@
+                        @*     <input type="hidden" name="id" value="@item.Id" /> *@
+                        @*     <i class="fa-solid fa-trash delete-icon" onclick="this.closest('form').submit()"></i> *@
+                        @* </form> *@
+                        <i class="fa-solid fa-trash delete-icon" onclick="event.stopPropagation(); showDeletePopup(@item.Id)"></i>
                     </td>
                     
                 </tr>
@@ -347,6 +367,36 @@
         </tbody>
     </table>
 }
+
+<div id="deletePopup">
+    <p>Are you sure you want to delete this task?</p>
+    <form id="deleteForm" method="post" asp-action="Delete">
+        <input type="hidden" name="id" id="deleteTaskId" />
+        <button type="submit" class="btn btn-danger">Yes</button>
+        <button type="button" class="btn btn-secondary" onclick="hideDeletePopup()">No</button>
+    </form>
+</div>
+
+<script>
+    function showDeletePopup(taskId) {
+        document.getElementById('deleteTaskId').value = taskId;
+        document.getElementById('deletePopup').style.display = 'block';
+    }
+
+    function hideDeletePopup() {
+        document.getElementById('deletePopup').style.display = 'none';
+    }
+
+    function handleRowClick(event, id, title, description, priority, dueTime) {
+        // Prevent edit modal from opening when clicking on delete button
+        if (event.target.closest('.delete-icon')) {
+            event.stopPropagation();
+            return;
+        }
+
+        openEditModal(id, title, description, priority, dueTime);
+    }
+</script>
 
 <script>
     function handleRowClick(event, id, title, description, priority, dueTime) {
@@ -398,22 +448,22 @@
         }
     });
 </script>
-<div id="deletePopup" class="popup-card">
-    <p>Are you sure you want to delete this task?</p>
-    <form id="deleteForm" method="post" asp-action="Delete">
-        <input type="hidden" name="id" id="deleteTaskId" />
-        <button type="submit" class="btn btn-danger">Yes</button>
-        <button type="button" class="btn btn-secondary" onclick="hideDeletePopup()">No</button>
-    </form>
-</div>
+@* <div id="deletePopup" class="popup-card"> *@
+@*     <p>Are you sure you want to delete this task?</p> *@
+@*     <form id="deleteForm" method="post" asp-action="Delete"> *@
+@*         <input type="hidden" name="id" id="deleteTaskId" /> *@
+@*         <button type="submit" class="btn btn-danger">Yes</button> *@
+@*         <button type="button" class="btn btn-secondary" onclick="hideDeletePopup()">No</button> *@
+@*     </form> *@
+@* </div> *@
 
-<script>
-    function showDeletePopup(taskId) {
-        document.getElementById('deleteTaskId').value = taskId;
-        document.getElementById('deletePopup').style.display = 'block';
-    }
+@* <script> *@
+@*     function showDeletePopup(taskId) { *@
+@*         document.getElementById('deleteTaskId').value = taskId; *@
+@*         document.getElementById('deletePopup').style.display = 'block'; *@
+@*     } *@
 
-    function hideDeletePopup() {
-        document.getElementById('deletePopup').style.display = 'none';
-    }
-</script>
+@*     function hideDeletePopup() { *@
+@*         document.getElementById('deletePopup').style.display = 'none'; *@
+@*     } *@
+@* </script> *@
