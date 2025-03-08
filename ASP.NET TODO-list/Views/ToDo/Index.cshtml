@@ -82,7 +82,7 @@
     .modal {
         display: none;
         position: fixed;
-        top: 15%; /* Adjusted to leave gap at the top */
+        top: 15%; 
         left: 50%;
         transform: translate(-50%, 0);
         background: #222;
@@ -92,7 +92,7 @@
         width: 350px;
         color: #f1c40f;
         z-index: 1000;
-        max-height: 75vh; /* Added to restrict height */
+        max-height: 75vh; 
         overflow-y: auto;
     }
 
@@ -285,7 +285,7 @@
         document.getElementById('editDescription').value = description;
         document.getElementById('editPriority').value = priority;
 
-        // Convert dueTime to ISO format for datetime-local input
+        // To convert dueTime to ISO format for datetime-local input
         let formattedDueTime = new Date(dueTime).toISOString().slice(0, 16);
         document.getElementById('editDueTime').value = formattedDueTime;
 
