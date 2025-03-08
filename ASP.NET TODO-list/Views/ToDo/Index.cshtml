@@ -67,6 +67,7 @@
         width: 100%;
         height: 80px;
         resize: none;
+        background: white;
     }
 
     #particles-js {
@@ -143,10 +144,15 @@
     }
 
     .task-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
         cursor: pointer;
         position: relative;
     }
+
+        .task-card.moving {
+            transform: translateY(30px);
+            opacity: 0.5;
+        }
 
         .task-card:hover {
             transform: translateY(-5px);
@@ -156,7 +162,7 @@
     .delete-icon {
         position: absolute;
         top: 50%;
-        right: 15px;
+        right: 10px;
         transform: translateY(-50%);
         cursor: pointer;
         color: red;
@@ -200,7 +206,9 @@
         display: none;
     }
 
+
 </style>
+<script src="https://kit.fontawesome.com/yourcode.js" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <div id="particles-js"></div>
 <div class="header-text">TO-DO LIST</div>
@@ -208,25 +216,25 @@
 <div class="container mt-4">
     
     <div class="add-task-btn" onclick="toggleTaskForm()">+ Add Task</div>
-    <div id="welcomeMessage" class="welcome-text">Welcome to Telexar TODO-List</div>
+    <div id="welcomeMessage" class="welcome-text @(Model != null && Model.Count > 0 ? "hidden" : "")">No Tasks Created. Please click on +Add Task to create a new task.</div>
     <div class="form-container task-form-container" id="taskForm">
         <form asp-action="Create" method="post">
             <div class="mb-3">
                 <label class="form-label">Task Name</label>
-                <input type="text" name="title" class="form-control" placeholder="Enter a new task" required />
+                <input type="text" name="title" style="background:#ffffff" class="form-control" placeholder="Add a new task" required />
             </div>
             <div class="mb-3">
                 <label class="form-label">Description</label>
-                <textarea name="description" class="form-control description-textarea" placeholder="Enter a brief description"></textarea>
+                <textarea name="description" class="form-control description-textarea" placeholder="Add a description"></textarea>
             </div>
-            <div class="mb-3 d-flex gap-2">
-                <select name="priority" class="form-select" required>
+            <div class="mb-3 d-flex gap-2" >
+                <select name="priority" class="form-select" style="background:#ffffff" required>
                     <option value="High">High</option>
                     <option value="Medium">Medium</option>
                     <option value="Low">Low</option>
                 </select>
-                <input type="datetime-local" name="dueTime" class="form-control" required />
-                <button type="submit" class="btn btn-warning">Add Task</button>
+                <input type="datetime-local" name="dueTime" class="form-control" style="background:#ffffff" required />
+                <button type="submit" class="btn btn-warning" style="width:200px">Add Task</button>
             </div>
         </form>
     </div>
@@ -303,7 +311,7 @@
                 <th>Priority</th>
                 <th>Due Time</th>
                 <th>Status</th>
-                <th>Actions</th>
+                
             </tr>
         </thead>
         <tbody>
@@ -319,7 +327,7 @@
                     </td>
                     <td>@item.DueTime.ToString("yyyy-MM-dd HH:mm")</td>
                     <td>
-                        <form asp-action="ToggleComplete" method="post" style="display:inline;" onclick="event.stopPropagation();">
+                        <form asp-action="ToggleComplete" method="post" style="display:inline;" onclick="event.stopPropagation(); animateTaskMove(@item.Id);">
                             <input type="hidden" name="id" value="@item.Id" />
                             <button type="submit" class="status-btn @(item.IsCompleted ? "status-completed" : "status-pending")">
                                 @(item.IsCompleted ? "Completed" : "Pending")
@@ -329,10 +337,12 @@
                     <td>
                         <form asp-action="Delete" method="post" style="display:inline;" onclick="event.stopPropagation();">
                             <input type="hidden" name="id" value="@item.Id" />
-                            <span class="delete-icon" onclick="this.closest('form').submit()">🗑️</span>
+                            <i class="fa-solid fa-trash delete-icon" onclick="this.closest('form').submit()"></i>
                         </form>
                     </td>
+                    
                 </tr>
+          
             }
         </tbody>
     </table>
@@ -342,6 +352,16 @@
     function handleRowClick(event, id, title, description, priority, dueTime) {
         if (!event.target.closest('button') && !event.target.closest('form')) {
             openEditModal(id, title, description, priority, dueTime);
+        }
+    }
+
+    function animateTaskMove(taskId) {
+        const taskRow = document.getElementById(`task-${taskId}`);
+        if (taskRow) {
+            taskRow.classList.add("moving");
+            setTimeout(() => {
+                taskRow.classList.remove("moving");
+            }, 500);
         }
     }
 </script>
